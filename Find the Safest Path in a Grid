@@ -1,0 +1,93 @@
+class Solution {
+    public boolean isValid(int i,int j,int m,int n){
+        if(i>=0 && i<n && j>=0 && j<m){
+            return true;
+        }
+        return false;
+    }
+
+    public boolean canReach(int limit,int dis[][],List<List<Integer>>grid,int dc[],int dr[]){
+        int n=grid.size();
+        if(dis[0][0]<limit || dis[n-1][n-1]<limit){
+            return false;
+        }
+        int vis[][]=new int[n][n];
+        vis[0][0]=1;
+        Queue<int[]>q=new LinkedList<>();
+        q.offer(new int[] {0,0});
+
+        while(!q.isEmpty()){
+            int curr[] = q.peek();
+            q.poll();
+            int x=curr[0],y=curr[1];
+
+            if(x==n-1 && y==n-1){
+                return true;
+            }
+
+            for(int k=0;k<4;k++){
+                int nx=x+dr[k],ny=y+dc[k];
+                if(isValid(nx,ny,n,n) && vis[nx][ny]==0 && dis[nx][ny]>=limit){
+                    q.offer(new int[] {nx,ny});
+                    vis[nx][ny]=1;
+                }
+            }
+        }
+        return false;
+    }
+    public int maximumSafenessFactor(List<List<Integer>> grid) {
+        int n=grid.size(),m=grid.get(0).size();
+        if(grid.get(0).get(0)==1 || grid.get(n-1).get(n-1)==1){
+            return 0;
+        }
+        int dis[][]=new int[n][m];
+        Queue<int[]>q=new LinkedList<>();
+
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(grid.get(i).get(j)==1){
+                    q.offer(new int[] {i,j});
+                    dis[i][j]=0;
+                }else{
+                    dis[i][j]=Integer.MAX_VALUE;
+                }
+            }
+        }
+
+        int dr[]={1,0,-1,0};
+        int dc[]={0,1,0,-1};
+
+        while(!q.isEmpty()){
+            int curr[]=q.peek();
+            q.poll();
+
+            int x=curr[0],y=curr[1];
+
+            for(int k=0;k<4;k++){
+                int nx=x+dr[k];
+                int ny=y+dc[k];
+
+                if(isValid(nx,ny,n,m) && dis[nx][ny]==Integer.MAX_VALUE){
+                    dis[nx][ny]=dis[x][y]+1;
+                    q.offer(new int[] {nx,ny});
+                }
+            }
+        }
+
+        int low=0, high=n+2,ans=0;
+
+        while(low<=high){
+            int mid =(low+high)/2;
+            if(canReach(mid,dis,grid,dc,dr)){
+                ans=mid;
+                low=mid+1;
+            }else{
+                high=mid-1;
+            }
+        }
+
+        return ans;
+
+
+    }
+}
